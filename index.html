@@ -1,0 +1,502 @@
+<!doctype html>
+<html lang="en-GB">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<style>body{margin:0}[hidden]{display:none!important}img{max-width:100%}</style>
+<title>Garmin Manual: Conversion of timestamp_16 to timestamp</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap">
+<style>
+/* Layout: guided tour. Left, the step card you read; right, a mock Excel window (or a picture) that changes with every step. Excel green is the only accent; sheet yellow marks the two formula columns. */
+:root{
+  --bg:#F3F6F4; --surface:#FFFFFF; --ink:#15201A; --muted:#55665C; --line:#D2DCD5; --grid:#E0E6E2; --hdr:#EDF1EE;
+  --accent:#107C41; --accent-ink:#FFFFFF; --accent-soft:#E1F1E7;
+  --yellow:#FFF27A; --yellow-ink:#15201A;
+  --blue:#2E5FD3; --blue-soft:#E3EBFB; --red:#C23A2B; --red-soft:#FAE6E3; --violet:#7A3DB8; --violet-soft:#EEE5F8; --amber:#B56A00; --amber-soft:#FBEEDB;
+  --f-display:"Space Grotesk","Segoe UI",system-ui,sans-serif;
+  --f-body:"Inter","Segoe UI",system-ui,sans-serif;
+  --f-mono:"JetBrains Mono",ui-monospace,Consolas,monospace;
+  color-scheme:light;
+}
+@media (prefers-color-scheme: dark){:root:not([data-theme="light"]){
+  --bg:#0D1310; --surface:#151E19; --ink:#E4ECE6; --muted:#9AAEA2; --line:#2A3630; --grid:#232E28; --hdr:#1B2520;
+  --accent:#3FBF7A; --accent-ink:#06150C; --accent-soft:#163020;
+  --yellow:#4A4413; --yellow-ink:#F5EFC4;
+  --blue:#7FA3F2; --blue-soft:#1A2440; --red:#F08A7C; --red-soft:#3A1E1A; --violet:#C29BF0; --violet-soft:#2A1E3A; --amber:#F0B25A; --amber-soft:#36280F;
+  color-scheme:dark;}}
+:root[data-theme="dark"]{
+  --bg:#0D1310; --surface:#151E19; --ink:#E4ECE6; --muted:#9AAEA2; --line:#2A3630; --grid:#232E28; --hdr:#1B2520;
+  --accent:#3FBF7A; --accent-ink:#06150C; --accent-soft:#163020;
+  --yellow:#4A4413; --yellow-ink:#F5EFC4;
+  --blue:#7FA3F2; --blue-soft:#1A2440; --red:#F08A7C; --red-soft:#3A1E1A; --violet:#C29BF0; --violet-soft:#2A1E3A; --amber:#F0B25A; --amber-soft:#36280F;
+  color-scheme:dark;}
+
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--ink);font-family:var(--f-body);font-size:15.5px;line-height:1.55}
+.wrap{max-width:1180px;margin:0 auto;padding-block:28px 48px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));display:grid;gap:20px}
+h1,h2,h3{font-family:var(--f-display);margin:0;line-height:1.15;text-wrap:balance}
+h1{font-size:clamp(24px,3.6vw,36px)}
+h2{font-size:clamp(20px,2.4vw,25px)}
+p{margin:0}
+code,.mono{font-family:var(--f-mono);font-size:.9em}
+.eyebrow{font:600 12px var(--f-mono);letter-spacing:.12em;text-transform:uppercase;color:var(--accent)}
+.lede{color:var(--muted);max-width:70ch}
+header{display:grid;gap:8px}
+
+/* chapter strip */
+.chapters{display:flex;flex-wrap:wrap;gap:6px}
+.chap{font:600 13px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--muted);padding:7px 12px;border-radius:999px;cursor:pointer;display:flex;gap:7px;align-items:center}
+.chap .n{font:600 11px var(--f-mono);width:20px;height:20px;border-radius:50%;display:grid;place-items:center;background:var(--hdr);color:var(--muted)}
+.chap.done .n{background:var(--accent-soft);color:var(--accent)}
+.chap.on{border-color:var(--accent);color:var(--ink)}
+.chap.on .n{background:var(--accent);color:var(--accent-ink)}
+.bar{height:4px;background:var(--line);border-radius:4px;overflow:hidden}
+.bar i{display:block;height:100%;background:var(--accent);transition:width .3s}
+
+/* main */
+.main{display:grid;grid-template-columns:minmax(0,4fr) minmax(0,7fr);gap:18px;align-items:start}
+@media (max-width:980px){.main{grid-template-columns:minmax(0,1fr)}}
+.card{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:14px;position:sticky;top:max(12px,env(safe-area-inset-top,0px))}
+@media (max-width:980px){.card{position:static}}
+.stepno{font:600 12px var(--f-mono);color:var(--muted);letter-spacing:.06em}
+.body{display:grid;gap:10px}
+.body p{max-width:62ch}
+.do{border:1px solid var(--accent);background:var(--accent-soft);border-radius:10px;padding:12px 14px;display:grid;gap:4px}
+.do b{font:600 12px var(--f-mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+.kbd{font:600 12px var(--f-mono);border:1px solid var(--line);border-bottom-width:2px;background:var(--surface);border-radius:5px;padding:1px 6px;white-space:nowrap}
+.outcome{display:flex;flex-wrap:wrap;align-items:baseline;justify-content:space-between;gap:8px 16px;border-top:1px dashed var(--line);padding-top:12px}
+.outcome .lbl{font:600 11px var(--f-mono);letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}
+.outcome .val{font:600 20px var(--f-mono);color:var(--accent);overflow-wrap:anywhere}
+.nav{display:flex;justify-content:space-between;gap:10px;align-items:center}
+.btn{font:600 14px var(--f-body);border-radius:8px;padding:10px 16px;cursor:pointer;border:1px solid var(--line);background:var(--surface);color:var(--ink)}
+.btn.primary{background:var(--accent);border-color:var(--accent);color:var(--accent-ink)}
+.btn:disabled{opacity:.4;cursor:default}
+.btn:focus-visible,.chap:focus-visible,.opt:focus-visible{outline:3px solid var(--accent);outline-offset:2px}
+.hint{font-size:12.5px;color:var(--muted)}
+.copy{font:600 12px var(--f-body);border:1px solid var(--line);background:var(--surface);color:var(--ink);border-radius:6px;padding:4px 10px;cursor:pointer}
+.codebox{font:13px/1.6 var(--f-mono);background:var(--hdr);border:1px solid var(--line);border-radius:8px;padding:10px 12px;overflow-wrap:anywhere}
+
+/* Excel window */
+.xl{background:var(--surface);border:1px solid var(--line);border-radius:14px;overflow:hidden}
+.xl-top{display:flex;align-items:center;gap:8px;padding:8px 12px;background:var(--accent);color:var(--accent-ink);font:600 13px var(--f-body)}
+.xl-top .dots{display:flex;gap:5px}.xl-top .dots i{width:9px;height:9px;border-radius:50%;background:currentColor;opacity:.5}
+.fbar{display:flex;gap:8px;align-items:flex-start;padding:10px 12px;border-bottom:1px solid var(--line);background:var(--hdr);position:relative}
+.namebox{font:500 13px var(--f-mono);background:var(--surface);border:1px solid var(--line);padding:5px 8px;border-radius:4px;min-width:54px;text-align:center}
+.fx{font:italic 600 15px Georgia,serif;color:var(--muted);padding-top:4px}
+.formula{flex:1;min-width:0;font:13.5px/1.9 var(--f-mono);background:var(--surface);border:1px solid var(--line);padding:3px 10px;border-radius:4px;overflow-wrap:anywhere;min-height:32px}
+.seg{border-radius:4px;transition:background .2s,box-shadow .2s}
+.seg.on{background:var(--accent-soft);box-shadow:0 0 0 2px var(--accent)}
+.flag{position:absolute;right:12px;top:-12px;font:600 11px var(--f-mono);background:var(--violet);color:var(--surface);padding:3px 8px;border-radius:999px}
+.sheetwrap{overflow-x:auto;padding:10px}
+table.sheet{border-collapse:collapse;font-size:12.5px;min-width:600px;width:100%;font-variant-numeric:tabular-nums}
+.sheet th,.sheet td{border:1px solid var(--grid);padding:5px 6px;height:33px;white-space:nowrap}
+.sheet thead th{background:var(--hdr);color:var(--muted);font-weight:500;text-align:center}
+.sheet tbody th{background:var(--hdr);color:var(--muted);font-weight:500;width:36px;text-align:right}
+.sheet .gap{width:22px;background:repeating-linear-gradient(90deg,var(--hdr) 0 3px,var(--surface) 3px 6px);color:var(--muted);font-size:11px;text-align:center;padding:0}
+.sheet td.y{background:var(--yellow);color:var(--yellow-ink)}
+.sheet td.r{text-align:right}
+.sheet tr.head td{font-weight:700}
+.sheet td.sel{box-shadow:inset 0 0 0 3px var(--accent)}
+.sheet td.ref-blue{box-shadow:inset 0 0 0 3px var(--blue)}
+.sheet td.ref-red{box-shadow:inset 0 0 0 3px var(--red)}
+.sheet td.ref-violet{box-shadow:inset 0 0 0 3px var(--violet)}
+.sheet th.hl{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.sheet td.q{color:var(--muted);font-style:italic;text-align:center}
+.sheet td.fill{position:relative}
+.sheet td.fill::after{content:"";position:absolute;right:-5px;bottom:-5px;width:9px;height:9px;background:var(--accent);border:2px solid var(--surface);animation:pulse 1.2s ease-in-out infinite}
+@keyframes pulse{50%{transform:scale(1.5)}}
+.pop{animation:pop .4s ease}
+@keyframes pop{0%{transform:scale(.8);opacity:.3}100%{transform:none;opacity:1}}
+.note{margin:0 12px 12px;padding:10px 12px;border-radius:8px;background:var(--amber-soft);border-left:4px solid var(--amber);font-size:14px}
+.legend{display:flex;flex-wrap:wrap;gap:12px;padding:0 12px 12px;font-size:12px;color:var(--muted)}
+.legend span::before{content:"";display:inline-block;width:11px;height:11px;border-radius:2px;margin-right:5px;vertical-align:-1px;box-shadow:inset 0 0 0 2.5px var(--c)}
+
+/* picture panes */
+.pane{background:var(--surface);border:1px solid var(--line);border-radius:14px;padding:22px;display:grid;gap:16px}
+.pane h3{font-size:17px}
+.pane svg{width:100%;height:auto;display:block}
+.pane svg text{font-family:var(--f-body)}
+.bits{display:grid;grid-template-columns:repeat(16,minmax(0,1fr));gap:4px}
+.bits span{aspect-ratio:1;border-radius:4px;display:grid;place-items:center;font:600 12px var(--f-mono);background:var(--accent);color:var(--accent-ink)}
+.bits.b32{grid-template-columns:repeat(32,minmax(0,1fr));gap:2px}
+.bits.b32 span{font-size:8px;border-radius:2px}
+.cmp{width:100%;border-collapse:collapse;font-size:14px}
+.cmp th,.cmp td{border-bottom:1px solid var(--line);padding:8px 6px;text-align:left}
+.cmp th{font:600 12px var(--f-mono);color:var(--muted);text-transform:uppercase;letter-spacing:.06em}
+.cmp td.num{font-family:var(--f-mono);font-variant-numeric:tabular-nums}
+.odo{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.odo .d{font:600 18px var(--f-mono);padding:10px 12px;border-radius:8px;background:var(--hdr);border:1px solid var(--line);font-variant-numeric:tabular-nums}
+.odo .d.top{background:var(--red-soft);border-color:var(--red)}
+.odo .d.zero{background:var(--accent-soft);border-color:var(--accent)}
+.odo .ar{color:var(--muted);font-size:18px}
+.dlg{border:1px solid var(--line);border-radius:10px;overflow:hidden;max-width:460px}
+.dlg .t{background:var(--hdr);padding:8px 12px;font-weight:600;border-bottom:1px solid var(--line)}
+.dlg .c{display:grid;grid-template-columns:140px minmax(0,1fr);gap:0}
+.dlg ul{list-style:none;margin:0;padding:8px;border-right:1px solid var(--line);font-size:13px}
+.dlg li{padding:4px 8px;border-radius:4px}
+.dlg li.on{background:var(--accent-soft);color:var(--accent);font-weight:600}
+.dlg .f{padding:12px;display:grid;gap:6px;font-size:13px;align-content:start}
+.dlg .inp{font:13px var(--f-mono);border:2px solid var(--accent);border-radius:4px;padding:5px 8px;background:var(--surface)}
+
+/* quiz */
+.opts{display:flex;flex-wrap:wrap;gap:8px}
+.opt{font:600 14px var(--f-mono);padding:9px 14px;border-radius:8px;border:1px solid var(--line);background:var(--surface);color:var(--ink);cursor:pointer}
+.opt.right{border-color:var(--accent);background:var(--accent-soft);color:var(--accent)}
+.opt.wrong{border-color:var(--red);background:var(--red-soft);color:var(--red)}
+footer{font-size:12.5px;color:var(--muted);display:grid;gap:4px}
+footer a{color:var(--accent)}
+@media (prefers-reduced-motion: reduce){*{animation:none!important;transition:none!important}}
+</style>
+</head>
+<body>
+
+<div class="wrap">
+  <header>
+    <div class="eyebrow">Demo walk-through · Microsoft Excel</div>
+    <h1>Garmin Manual: Conversion of timestamp_16 to timestamp</h1>
+    <p class="lede">Most rows in a Garmin monitoring file hold only a short time number called timestamp_16. This walk-through shows, one click at a time, how two yellow columns in the workbook turn it into a real date and time. No Excel experience is needed.</p>
+  </header>
+
+  <nav class="chapters" id="chapters" aria-label="Chapters"></nav>
+  <div class="bar" aria-hidden="true"><i id="progress"></i></div>
+
+  <div class="main">
+    <section class="card" aria-live="polite">
+      <div class="stepno" id="stepno"></div>
+      <h2 id="title"></h2>
+      <div class="body" id="body"></div>
+      <div class="do" id="do"><b>Do this in Excel</b><div id="doText"></div></div>
+      <div class="outcome" id="outcome"><span class="lbl">Outcome</span><span class="val" id="val"></span></div>
+      <div class="nav">
+        <button class="btn" id="prev" type="button">Back</button>
+        <span class="hint">Use the arrow keys too</span>
+        <button class="btn primary" id="next" type="button">Next</button>
+      </div>
+    </section>
+    <section id="stage" aria-label="Picture for this step"></section>
+  </div>
+
+  <footer>
+    <div>Workbook used in the examples: timestamp_16_to_timestamp.xlsx, wellness monitoring data from 27 August 2026. All times are in UTC.</div>
+    <div>Sources: <a href="https://developer.garmin.com/fit/cookbook/datetime/" target="_blank" rel="noopener">Garmin FIT Cookbook, Working with Dates</a> · <a href="https://forums.garmin.com/developer/fit-sdk/f/discussion/311422/fit-timestamp_16-heart-rate---excel" target="_blank" rel="noopener">Garmin Developer Forum, FIT timestamp_16 Heart Rate in Excel</a> · <a href="https://support.microsoft.com/en-us/excel/mod-function" target="_blank" rel="noopener">Microsoft, MOD function</a></div>
+  </footer>
+</div>
+
+<script>
+(function(){
+  const $ = (id) => document.getElementById(id);
+  const esc = (s) => String(s).replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+
+  // ---------- sheet data (rows 1 to 6 of the workbook) ----------
+  const COLS = ["A","gap","G","H","I","J"];
+  const HEAD = {A:"timestamp", G:"timestamp_16", H:"heart_rate", I:"Reference Point", J:"Actual Timestamp"};
+  const ROWS = {
+    2:{A:"2026-08-27T13:59:00.000Z", I:"1156773540"},
+    3:{A:"2026-08-27T14:00:00.000Z", I:"1156773600"},
+    4:{G:"63260", H:"87", I:"1156773600", J:"2026-08-27 14:01:00"},
+    5:{G:"63320", H:"93", I:"1156773600", J:"2026-08-27 14:02:00"},
+    6:{G:"63380", H:"98", I:"1156773600", J:"2026-08-27 14:03:00"},
+  };
+
+  // ---------- formulas as [text, partId] ----------
+  const FI = (r, p) => [["=IF(",0],[`A${r}<>""`,1],[", ROUND((",9],["DATE(",3],[`LEFT(A${r},4)`,2],[",",3],[`MID(A${r},6,2)`,2],[",",3],[`MID(A${r},9,2)`,2],[")",3],["+TIMEVALUE(",4],[`MID(A${r},12,8)`,4],[")",4],["-DATE(1989,12,31)",5],[")*86400",6],[",0)",9],[", ",0],[`I${p}`,7],[")",0]];
+  const FJ = (r) => [["=IF(",0],[`G${r}=""`,1],[', "", ',0],["DATE(1989,12,31)",6],["+(",0],[`I${r}`,5],["+",5],["MOD(",4],[`G${r}-`,3],[`MOD(I${r},65536)`,2],[",65536)",4],[")/86400",6],[")",0]];
+  const FI2 = FI(2,1), FJ2 = FJ(2);
+
+  // ---------- steps ----------
+  const CH = ["Excel basics","The workbook","Background","Column I","Column J","Do it yourself"];
+  const S = [
+    // Excel basics
+    {ch:0, t:"Columns, rows and cells",
+     b:["An Excel sheet is a grid. Columns have letters along the top (A, B, C…) and rows have numbers down the side (1, 2, 3…).","Each box is a <b>cell</b>. A cell is named by its column letter and row number, so the box in column A, row 3 is called <b>A3</b>."],
+     d:"Click any cell. Its name appears in the small <b>Name Box</b> at the top left.",
+     v:"A3", x:{sel:"A3", hl:["A",3]}},
+    {ch:0, t:"The formula bar",
+     b:["Some cells hold a typed value. Others hold a <b>formula</b>, a small calculation that Excel works out for you.","The cell shows the answer. To see the calculation behind it, look at the <b>formula bar</b>, the long box next to <i>fx</i>."],
+     d:"Click cell <b>I3</b>. The cell shows 1156773600, and the formula bar shows the formula that made it.",
+     v:"1156773600", x:{sel:"I3", f:FI(3,2)}},
+    {ch:0, t:"How to read a formula",
+     b:["Every formula starts with an equals sign <code>=</code>.","A <b>function</b> is a named tool followed by brackets, such as <code>DATE( )</code> or <code>MOD( )</code>. The values inside the brackets are its inputs, and commas separate them.","Excel works from the innermost brackets outwards, just as you would in maths. This walk-through follows the same order."],
+     d:"With I3 still selected, read the formula from left to right and spot the function names in capitals.",
+     v:"", x:{sel:"I3", f:FI(3,2), on:[0]}},
+    // Workbook
+    {ch:1, t:"The four columns we use",
+     b:["The workbook holds wellness monitoring data recorded on 27 August 2026. We focus on four columns.","<b>A, timestamp</b> holds the full date and time as text. Only some rows have it.<br><b>G, timestamp_16</b> holds the short 16 bit time number. Most rows have it.<br><b>I, Reference Point</b> (yellow) is a formula giving the latest full time in seconds.<br><b>J, Actual Timestamp</b> (yellow) is a formula giving the real date and time of each reading."],
+     d:"Scroll right to columns <b>I</b> and <b>J</b>. They are filled in yellow. Columns B to F hold activity data and are hidden in these pictures.",
+     v:"", x:{heads:["A","G","I","J"]}},
+    {ch:1, t:"Two kinds of row",
+     b:["Row 3 has a full timestamp in column A, 14:00:00 on 27 August 2026.","Row 4 has no full timestamp. It has the short number 63260 in column G and a heart rate of 87 in column H. Our job is to find out when that heart rate was recorded."],
+     d:"Compare cell <b>A3</b> with cells <b>G4</b> and <b>H4</b>.",
+     v:"Row 4 needs a real time", x:{refs:{A3:"blue",G4:"red",H4:"red"}, hideJ:true}},
+    // Background
+    {ch:2, t:"How Garmin counts time",
+     b:["Garmin does not store a date such as 27 August 2026. It counts the <b>seconds</b> that have passed since a fixed starting time, 31 December 1989 at 00:00:00 UTC.","Garmin calls this starting moment the <b>FIT epoch</b>. For example, 27 August 2026 at 14:00:00 UTC is 1,156,773,600 seconds after it."],
+     d:"Nothing to click yet. Just remember that Garmin time is a count of seconds.",
+     v:"1,156,773,600 seconds", pane:"epoch"},
+    {ch:2, t:"16 bit and 32 bit",
+     b:["A bit is a tiny switch that is either 0 or 1. The more bits a number has, the more different values it can hold.","The full <b>timestamp</b> uses 32 bits, enough to count every second for over 136 years. <b>timestamp_16</b> uses only 16 bits, so it takes half the space but can only count to 65,535."],
+     d:"Nothing to click. Look at the switches on the right. Sixteen switches allow 65,536 different numbers.",
+     v:"2¹⁶ = 65,536", pane:"bits"},
+    {ch:2, t:"Why timestamp_16 exists, and the rollover",
+     b:["Writing the full seconds count on every row would fill the watch's memory. So the watch writes a full timestamp only now and then, and on the rows in between it saves only the last part of the number, the timestamp_16 value.","After 65,535 the short number starts again at 0, like a clock going from 12 back to 1. This is called a <b>rollover</b>. It happens every 18 hours, 12 minutes and 16 seconds, and the formulas handle it for you."],
+     d:"Nothing to click. In the workbook, row 45 shows a rollover, where the value drops from 65480 to 4.",
+     v:"Resets every 18 h 12 min 16 s", pane:"roll"},
+    {ch:2, t:"How Excel stores dates",
+     b:["Excel also stores dates as numbers, but it counts <b>days</b>, not seconds. A whole number is a full day, and the decimal part is the time of day. So 0.5 means 12:00 noon and 0.25 means 06:00.","One day has 86,400 seconds. We divide seconds by 86,400 to get days, and multiply days by 86,400 to get seconds. You will see 86400 in both formulas."],
+     d:"Nothing to click. Keep the number 86,400 in mind.",
+     v:"1 day = 86,400 seconds", pane:"days"},
+    // Column I
+    {ch:3, t:"Select cell I3",
+     b:["Column I gives every row an <b>anchor</b>, the latest full time in seconds. If column A has a full timestamp, the formula converts it. If column A is empty, it copies the anchor from the row above.","We will now take the formula in I3 apart, one piece at a time."],
+     d:"Click cell <b>I3</b> and look at the formula bar.",
+     v:"", x:{sel:"I3", f:FI(3,2), hideI3:true}},
+    {ch:3, t:"Part 1. Is there a full timestamp?",
+     b:["<code>IF</code> asks a yes or no question. Here it asks whether A3 is not empty. The sign <code>&lt;&gt;</code> means \"not equal to\", and <code>\"\"</code> means an empty cell.","A3 holds a timestamp, so the answer is TRUE and Excel carries on with the calculation."],
+     d:"Look at cell <b>A3</b>, outlined in blue.",
+     v:"TRUE", x:{sel:"I3", f:FI(3,2), on:[1], refs:{A3:"blue"}, hideI3:true}},
+    {ch:3, t:"Part 2. Read the year, month and day",
+     b:["The timestamp in A3 is text, so we cut it into pieces.","<code>LEFT(A3,4)</code> takes the first 4 characters, the year. <code>MID(A3,6,2)</code> takes 2 characters starting at position 6, the month. <code>MID(A3,9,2)</code> takes 2 characters from position 9, the day."],
+     d:"Count the characters in A3 from the left. Position 6 is where <b>08</b> starts.",
+     v:"\"2026\"  \"08\"  \"27\"", x:{sel:"I3", f:FI(3,2), on:[2], refs:{A3:"blue"}, hideI3:true}},
+    {ch:3, t:"Part 3. Build the date",
+     b:["<code>DATE(year, month, day)</code> turns the three pieces into a real Excel date.","Excel stores 27 August 2026 as day number 46,261."],
+     d:"No click needed. The highlighted DATE part builds the date.",
+     v:"46,261", x:{sel:"I3", f:FI(3,2), on:[3,2], hideI3:true}},
+    {ch:3, t:"Part 4. Read the time",
+     b:["<code>MID(A3,12,8)</code> takes the 8 characters starting at position 12, which is <code>14:00:00</code>.","<code>TIMEVALUE</code> turns that text into part of a day. 14 hours out of 24 is 0.583333."],
+     d:"Find <b>14:00:00</b> inside cell A3.",
+     v:"0.583333", x:{sel:"I3", f:FI(3,2), on:[4], refs:{A3:"blue"}, hideI3:true}},
+    {ch:3, t:"Part 5. Subtract the FIT epoch",
+     b:["<code>DATE(1989,12,31)</code> is the FIT epoch, which Excel stores as day 32,873.","Date plus time minus the epoch gives the number of days since Garmin started counting. 46,261 + 0.583333 − 32,873 = 13,388.583333 days."],
+     d:"No click needed.",
+     v:"13,388.583333 days", x:{sel:"I3", f:FI(3,2), on:[5,3,4], hideI3:true}},
+    {ch:3, t:"Part 6. Days into seconds",
+     b:["Multiplying by 86,400 turns days into seconds. <code>ROUND(…,0)</code> then removes any tiny decimal left by the computer.","So cell I3 shows <b>1,156,773,600</b>, which is 14:00:00 UTC counted in seconds since the FIT epoch."],
+     d:"Look at cell <b>I3</b>. The value is now explained.",
+     v:"1,156,773,600", x:{sel:"I3", f:FI(3,2), on:[6,9], showI3:true}},
+    {ch:3, t:"Row 4 copies the anchor",
+     b:["Now click I4. Its formula is the same, but it looks at row 4.","A4 is empty, so the yes or no question is FALSE. Excel skips the long calculation and simply copies the value from the cell above, I3. Every row keeps this anchor until column A has a new full timestamp."],
+     d:"Click cell <b>I4</b>. A4 (blue) is empty, so the value comes from I3 (red).",
+     v:"1,156,773,600", x:{sel:"I4", f:FI(4,3), on:[1,7], refs:{A4:"blue", I3:"red"}}},
+    // Column J
+    {ch:4, t:"Select cell J4",
+     b:["Column J finds how many seconds the reading is after the anchor, adds them on, and turns the total back into a date.","We will take the formula in J4 apart in the same way."],
+     d:"Click cell <b>J4</b> and look at the formula bar.",
+     v:"", x:{sel:"J4", f:FJ(4), hideJ4:true}},
+    {ch:4, t:"Part 1. Is there a short time number?",
+     b:["<code>IF(G4=\"\", \"\", …)</code> asks whether G4 is empty. If it is, the cell stays blank. If not, Excel carries on.","G4 holds 63260, so Excel carries on."],
+     d:"Look at cell <b>G4</b>, outlined in blue.",
+     v:"Carry on (G4 = 63260)", x:{sel:"J4", f:FJ(4), on:[1], refs:{G4:"blue"}, hideJ4:true}},
+    {ch:4, t:"Part 2. The anchor as a 16 bit number",
+     b:["<code>MOD</code> gives the remainder after division. <code>MOD(I4,65536)</code> divides the anchor by 65,536 and keeps the remainder.","That remainder is what the anchor time, 14:00:00, looks like as a 16 bit number."],
+     d:"Look at cell <b>I4</b>, outlined in red.",
+     v:"63,200", x:{sel:"J4", f:FJ(4), on:[2], refs:{I4:"red"}, hideJ4:true}},
+    {ch:4, t:"Part 3. The gap after the anchor",
+     b:["Now subtract. G4 minus 63,200 is 63,260 − 63,200 = 60.","So this reading was taken 60 seconds after the anchor."],
+     d:"Compare <b>G4</b> (blue) with the anchor in <b>I4</b> (red).",
+     v:"60", x:{sel:"J4", f:FJ(4), on:[3,2], refs:{G4:"blue", I4:"red"}, hideJ4:true}},
+    {ch:4, t:"Part 4. Keep the gap positive",
+     b:["The outer <code>MOD(…,65536)</code> leaves 60 unchanged here.","It matters only after a rollover. In row 45 the gap comes out as −65,356, and MOD turns it into the correct 180 seconds."],
+     d:"No click needed.",
+     v:"60 seconds", x:{sel:"J4", f:FJ(4), on:[4,3,2], hideJ4:true}},
+    {ch:4, t:"Part 5. Back to a real date",
+     b:["Add the gap to the anchor, 1,156,773,600 + 60. Divide by 86,400 to turn seconds into days, then add the FIT epoch date.","So J4 shows <b>27 August 2026, 14:01:00 UTC</b>, which is 60 seconds after the 14:00:00 anchor. That is when the heart rate of 87 in row 4 was recorded."],
+     d:"Look at cell <b>J4</b>. The real time has appeared.",
+     v:"2026-08-27 14:01:00", x:{sel:"J4", f:FJ(4), on:[5,6], showJ4:true, refs:{H4:"blue"}}},
+    // Do it yourself
+    {ch:5, t:"Type the two formulas",
+     b:["To use this on a new Garmin file, open the CSV in Excel and save it as an Excel Workbook (.xlsx). A CSV cannot keep formulas.","Click cell <b>I2</b>, type or paste the first formula below and press <span class=\"kbd\">Enter</span>. Then click <b>J2</b> and do the same with the second formula."],
+     d:"Copy each formula with its button, then paste it into the cell with <span class=\"kbd\">Ctrl</span> + <span class=\"kbd\">V</span>.",
+     v:"", code:true, x:{sel:"I2", f:FI2, empty:true}},
+    {ch:5, t:"Fill the formulas down",
+     b:["Select I2 and J2 together. A small green square appears at the bottom right of the selection. This is the <b>fill handle</b>.","Double-click the fill handle. Excel copies both formulas down to the last row and changes the row numbers for you."],
+     d:"Drag across <b>I2:J2</b>, then double-click the small green square.",
+     v:"Formulas in every row", x:{sel:"J2", fill:true, f:FJ2}},
+    {ch:5, t:"Show column J as a date",
+     b:["Column J may first show a long number such as 46261.58403. That is a date Excel has not formatted yet.","Select column J, press <span class=\"kbd\">Ctrl</span> + <span class=\"kbd\">1</span>, choose <b>Custom</b>, and type <code>yyyy-mm-dd hh:mm:ss</code> in the Type box."],
+     d:"Click the letter <b>J</b> at the top of the column, then press <span class=\"kbd\">Ctrl</span> + <span class=\"kbd\">1</span>.",
+     v:"2026-08-27 14:01:00", pane:"format"},
+    {ch:5, t:"Check yourself",
+     b:["Row 5 has 63320 in column G, and its anchor is still 14:00:00 (63,200 as a 16 bit number). What will cell J5 show?"],
+     d:"Pick an answer, then click <b>J5</b> in the workbook to confirm.",
+     v:"", pane:"quiz"},
+  ];
+
+  // ---------- render ----------
+  let i = 0;
+  const chapters = $("chapters");
+  CH.forEach((name, k) => {
+    const b = document.createElement("button");
+    b.type = "button"; b.className = "chap"; b.id = "chap" + k;
+    b.innerHTML = `<span class="n">${k+1}</span>${name}`;
+    b.addEventListener("click", () => { i = S.findIndex((s) => s.ch === k); render(); });
+    chapters.appendChild(b);
+  });
+
+  function sheetHTML(x){
+    const sel = x.sel || "", refs = x.refs || {};
+    const selCol = sel.replace(/\d+/,""), selRow = +sel.replace(/\D+/,"");
+    let h = '<div class="sheetwrap"><table class="sheet"><thead><tr><th></th>';
+    COLS.forEach((c) => {
+      if (c === "gap") { h += '<th class="gap" title="Columns B to F hidden">B–F</th>'; return; }
+      const hl = c === selCol || (x.heads || []).includes(c) || (x.hl && x.hl[0] === c);
+      h += `<th class="${hl ? "hl" : ""}">${c}</th>`;
+    });
+    h += "</tr></thead><tbody>";
+    for (let r = 1; r <= 6; r++) {
+      const rowHl = r === selRow || (x.hl && x.hl[1] === r);
+      h += `<tr class="${r===1?"head":""}"><th class="${rowHl?"hl":""}">${r}</th>`;
+      COLS.forEach((c) => {
+        if (c === "gap") { h += '<td class="gap"></td>'; return; }
+        const id = c + r;
+        let v = r === 1 ? HEAD[c] : ((ROWS[r] || {})[c] || "");
+        const cls = [];
+        if (c === "I" || c === "J") cls.push("y");
+        if (r > 1 && c !== "A") cls.push("r");
+        if (x.empty && r > 1 && (c === "I" || c === "J")) v = "";
+        if (x.hideJ && c === "J" && r > 1) v = "";
+        if (x.hideI3 && id === "I3") { v = "?"; cls.push("q"); }
+        if (x.hideJ4 && id === "J4") { v = "?"; cls.push("q"); }
+        if (id === sel) cls.push("sel");
+        if (refs[id]) cls.push("ref-" + refs[id]);
+        if (x.fill && id === "J2") cls.push("fill");
+        if (x.fill && (id === "I2")) cls.push("sel");
+        const pop = (x.showI3 && id === "I3") || (x.showJ4 && id === "J4");
+        h += `<td class="${cls.join(" ")}">${pop ? `<span class="pop">${esc(v)}</span>` : esc(v)}</td>`;
+      });
+      h += "</tr>";
+    }
+    return h + "</tbody></table></div>";
+  }
+
+  function excel(s){
+    const x = s.x, on = x.on || [];
+    const f = x.f ? x.f.map(([t,p]) => `<span class="seg${on.includes(p) && (p || on.includes(0)) ? " on" : ""}">${esc(t)}</span>`).join("") : "";
+    const legend = '<div class="legend"><span style="--c:var(--accent)">Selected cell</span><span style="--c:var(--blue)">Cell being read</span><span style="--c:var(--red)">Anchor or copied cell</span></div>';
+    return `<div class="xl"><div class="xl-top"><span class="dots"><i></i><i></i><i></i></span>timestamp_16_to_timestamp.xlsx</div>
+      <div class="fbar"><div class="namebox">${esc(x.fill ? "I2:J2" : (x.sel || "A1"))}</div><div class="fx">fx</div><div class="formula">${f}</div></div>
+      ${sheetHTML(x)}${legend}</div>`;
+  }
+
+  const PANES = {
+    epoch: () => `<div class="pane"><h3>Seconds since the FIT epoch</h3>
+      <svg viewBox="0 0 640 170" role="img" aria-label="Timeline from 31 December 1989 to 27 August 2026, 1,156,773,600 seconds apart">
+        <line x1="40" y1="90" x2="600" y2="90" stroke="var(--line)" stroke-width="4"/>
+        <line x1="40" y1="90" x2="600" y2="90" stroke="var(--accent)" stroke-width="4"/>
+        <circle cx="40" cy="90" r="9" fill="var(--accent)"/><circle cx="600" cy="90" r="9" fill="var(--amber)"/>
+        <text x="40" y="128" text-anchor="start" font-size="14" font-weight="700" fill="var(--ink)">31 Dec 1989, 00:00:00</text>
+        <text x="40" y="148" text-anchor="start" font-size="13" fill="var(--muted)">FIT epoch = 0 seconds</text>
+        <text x="600" y="128" text-anchor="end" font-size="14" font-weight="700" fill="var(--ink)">27 Aug 2026, 14:00:00</text>
+        <text x="600" y="148" text-anchor="end" font-size="13" fill="var(--muted)">the time in cell A3</text>
+        <rect x="200" y="40" width="240" height="34" rx="8" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <text x="320" y="62" text-anchor="middle" font-size="15" font-weight="700" fill="var(--accent)">1,156,773,600 seconds</text>
+      </svg>
+      <p class="hint">All Garmin times are in UTC. Local Texas time is 5 hours behind in summer and 6 in winter.</p></div>`,
+    bits: () => `<div class="pane"><h3>16 switches hold 65,536 numbers</h3>
+      <div class="bits" aria-label="Sixteen bits">${"<span>1</span>".repeat(16)}</div>
+      <p class="hint">With all 16 switches on, the number is 65,535, the largest timestamp_16 can hold.</p>
+      <div class="bits b32" aria-label="Thirty-two bits">${"<span>1</span>".repeat(32)}</div>
+      <p class="hint">The full timestamp has 32 switches.</p>
+      <div style="overflow-x:auto"><table class="cmp"><thead><tr><th>Bits</th><th>Different values</th><th>Counts seconds for</th></tr></thead><tbody>
+        <tr><td>16, timestamp_16</td><td class="num">2¹⁶ = 65,536</td><td>18 h 12 min 16 s</td></tr>
+        <tr><td>32, timestamp</td><td class="num">2³² = 4,294,967,296</td><td>136 years, 1 month, 6 days</td></tr>
+      </tbody></table></div></div>`,
+    roll: () => `<div class="pane"><h3>The counter starts again at 0</h3>
+      <div class="odo"><span class="d">65,533</span><span class="ar">→</span><span class="d">65,534</span><span class="ar">→</span><span class="d top">65,535</span><span class="ar">→</span><span class="d zero">0</span><span class="ar">→</span><span class="d">1</span></div>
+      <p>The full count keeps going up, but the short number only shows the last part of it, so it wraps round.</p>
+      <div style="overflow-x:auto"><table class="cmp"><thead><tr><th>Row</th><th>timestamp_16</th><th>Real time (UTC)</th></tr></thead><tbody>
+        <tr><td>44</td><td class="num">65480</td><td>14:38:00</td></tr>
+        <tr><td>45</td><td class="num">4</td><td>14:39:00</td></tr>
+        <tr><td>46</td><td class="num">124</td><td>14:41:00</td></tr>
+      </tbody></table></div></div>`,
+    days: () => `<div class="pane"><h3>One day in Excel runs from 0 to 1</h3>
+      <svg viewBox="0 0 640 150" role="img" aria-label="A day bar from 0 to 1 with 06:00 at 0.25, 12:00 at 0.5 and 14:00 at 0.583333">
+        <rect x="40" y="60" width="560" height="22" rx="11" fill="var(--hdr)" stroke="var(--line)"/>
+        <rect x="40" y="60" width="326.7" height="22" rx="11" fill="var(--accent-soft)" stroke="var(--accent)"/>
+        <g font-size="13" fill="var(--muted)" text-anchor="middle">
+          <line x1="40" y1="52" x2="40" y2="90" stroke="var(--muted)"/><text x="40" y="44">00:00</text><text x="40" y="110">0</text>
+          <line x1="180" y1="52" x2="180" y2="90" stroke="var(--muted)"/><text x="180" y="44">06:00</text><text x="180" y="110">0.25</text>
+          <line x1="320" y1="52" x2="320" y2="90" stroke="var(--muted)"/><text x="320" y="44">12:00</text><text x="320" y="110">0.5</text>
+          <line x1="600" y1="52" x2="600" y2="90" stroke="var(--muted)"/><text x="600" y="44">24:00</text><text x="600" y="110">1</text>
+        </g>
+        <line x1="366.7" y1="52" x2="366.7" y2="96" stroke="var(--accent)" stroke-width="2.5"/>
+        <text x="366.7" y="132" text-anchor="middle" font-size="14" font-weight="700" fill="var(--accent)">14:00 = 0.583333</text>
+      </svg>
+      <p><b>Seconds ÷ 86,400 = days.</b> Days × 86,400 = seconds.</p></div>`,
+    format: () => `<div class="pane"><h3>Format Cells</h3>
+      <div class="dlg"><div class="t">Format Cells</div><div class="c">
+        <ul><li>General</li><li>Number</li><li>Date</li><li>Time</li><li class="on">Custom</li></ul>
+        <div class="f"><span>Type</span><div class="inp">yyyy-mm-dd hh:mm:ss</div><span class="hint">Sample</span><b class="mono">2026-08-27 14:01:00</b></div>
+      </div></div>
+      <p class="hint">Before. 46261.58403 &nbsp;→&nbsp; After. 2026-08-27 14:01:00</p></div>`,
+    quiz: () => `<div class="pane"><h3>What will cell J5 show?</h3>
+      <p>G5 is 63,320. The anchor is 63,200.</p>
+      <div class="opts" id="opts">
+        <button class="opt" type="button" data-ok="0" data-m="That is J4. G5 is 60 higher than G4.">14:01:00</button>
+        <button class="opt" type="button" data-ok="1" data-m="Correct. 63,320 − 63,200 = 120 seconds, which is 2 minutes after 14:00:00.">14:02:00</button>
+        <button class="opt" type="button" data-ok="0" data-m="Not quite. The gap is 120 seconds, which is 2 minutes, not 20.">14:20:00</button>
+      </div>
+      <p class="hint" id="fb" aria-live="polite">Choose one.</p></div>`,
+  };
+
+  const F1 = '=IF(A2<>"", ROUND((DATE(LEFT(A2,4),MID(A2,6,2),MID(A2,9,2))+TIMEVALUE(MID(A2,12,8))-DATE(1989,12,31))*86400,0), I1)';
+  const F2 = '=IF(G2="", "", DATE(1989,12,31)+(I2+MOD(G2-MOD(I2,65536),65536))/86400)';
+
+  function render(){
+    const s = S[i];
+    CH.forEach((_, k) => {
+      const el = $("chap" + k);
+      el.classList.toggle("on", k === s.ch);
+      el.classList.toggle("done", k < s.ch);
+      el.setAttribute("aria-current", k === s.ch ? "step" : "false");
+    });
+    $("progress").style.width = ((i + 1) / S.length * 100) + "%";
+    const inCh = S.filter((x) => x.ch === s.ch), pos = inCh.indexOf(s) + 1;
+    $("stepno").textContent = `${CH[s.ch]} · step ${pos} of ${inCh.length}`;
+    $("title").textContent = s.t;
+    let body = s.b.map((p) => `<p>${p}</p>`).join("");
+    if (s.code) {
+      body += `<div style="display:grid;gap:8px">
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Cell I2</b><button class="copy" type="button" data-c="1">Copy</button></div><div class="codebox" id="c1">${esc(F1)}</div>
+        <div style="display:flex;justify-content:space-between;align-items:center;gap:8px"><b>Cell J2</b><button class="copy" type="button" data-c="2">Copy</button></div><div class="codebox" id="c2">${esc(F2)}</div></div>`;
+    }
+    $("body").innerHTML = body;
+    $("doText").innerHTML = s.d;
+    $("val").textContent = s.v;
+    $("outcome").hidden = !s.v;
+    $("stage").innerHTML = s.pane ? PANES[s.pane]() : excel(s);
+    $("prev").disabled = i === 0;
+    $("next").textContent = i === S.length - 1 ? "Start again" : "Next";
+
+    document.querySelectorAll(".copy").forEach((b) => b.addEventListener("click", () => {
+      const txt = b.dataset.c === "1" ? F1 : F2;
+      const done = () => { b.textContent = "Copied"; setTimeout(() => b.textContent = "Copy", 1500); };
+      try {
+        navigator.clipboard.writeText(txt).then(done, () => selectText(b.dataset.c));
+      } catch (e) { selectText(b.dataset.c); }
+    }));
+    const opts = $("opts");
+    if (opts) opts.querySelectorAll(".opt").forEach((o) => o.addEventListener("click", () => {
+      opts.querySelectorAll(".opt").forEach((x) => x.classList.remove("right","wrong"));
+      o.classList.add(o.dataset.ok === "1" ? "right" : "wrong");
+      $("fb").textContent = o.dataset.m;
+    }));
+  }
+  function selectText(n){
+    const el = $("c" + n), r = document.createRange(); r.selectNodeContents(el);
+    const sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(r);
+  }
+
+  $("prev").addEventListener("click", () => { if (i > 0) { i--; render(); } });
+  $("next").addEventListener("click", () => { i = (i + 1) % S.length; render(); });
+  document.addEventListener("keydown", (e) => {
+    if (e.target.closest && e.target.closest("input,textarea")) return;
+    if (e.key === "ArrowRight") $("next").click();
+    if (e.key === "ArrowLeft" && i > 0) $("prev").click();
+  });
+  render();
+})();
+</script>
+</body>
+</html>
